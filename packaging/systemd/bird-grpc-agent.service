@@ -1,0 +1,17 @@
+[Unit]
+Description=BIRD gRPC Exporter
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+RuntimeDirectory=bird-grpc-agent
+RuntimeDirectoryMode=0755
+EnvironmentFile=-/etc/bird-grpc-agent/agent.env
+ExecStart=/usr/sbin/bird-grpc-agent
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,14 @@
+[package]
+name = "bird-grpc-agent"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bytes = "1.5"
+libc = "0.2"
+prost = "0.12"
+tokio = { version = "1.36", features = ["macros", "rt-multi-thread", "signal"] }
+tonic = { version = "0.11", features = ["transport"] }
+
+[build-dependencies]
+tonic-build = "0.11"

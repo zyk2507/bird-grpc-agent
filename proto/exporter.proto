@@ -1,0 +1,178 @@
+syntax = "proto3";
+
+package birdexporter;
+
+message Empty {}
+
+message IpAddr {
+  uint32 af = 1; // 0 = none, 4 = IPv4, 6 = IPv6
+  bytes bytes = 2;
+}
+
+message RouterStatus {
+  uint64 boot_time = 1;
+  uint64 current_time = 2;
+}
+
+message InterfaceAddress {
+  uint32 iface_index = 1;
+  uint32 prefix_len = 2;
+  uint32 scope = 3;
+  uint32 flags = 4;
+  IpAddr ip = 5;
+  IpAddr brd = 6;
+  IpAddr opposite = 7;
+}
+
+message Interface {
+  string name = 1;
+  uint32 flags = 2;
+  uint32 mtu = 3;
+  uint32 index = 4;
+  repeated InterfaceAddress addrs = 5;
+}
+
+message ProtocolInfo {
+  string name = 1;
+  uint32 class = 2;
+  uint32 state = 3;
+}
+
+message BgpInfo {
+  string name = 1;
+  uint32 local_as = 2;
+  uint32 remote_as = 3;
+  uint32 conn_state = 4;
+  IpAddr remote_ip = 5;
+}
+
+message OspfLsa {
+  uint32 proto_index = 1;
+  uint32 lsa_type = 2;
+  uint32 domain = 3;
+  uint32 id = 4;
+  uint32 rt = 5;
+  int32 sn = 6;
+  uint32 age = 7;
+  uint32 length = 8;
+  uint32 type_raw = 9;
+}
+
+message OspfNeighbor {
+  uint32 proto_index = 1;
+  string ifname = 2;
+  uint32 rid = 3;
+  uint32 state = 4;
+  IpAddr ip = 5;
+}
+
+message OspfInfo {
+  string name = 1;
+  uint32 router_id = 2;
+  uint32 version = 3;
+  repeated OspfLsa lsas = 4;
+  repeated OspfNeighbor neighbors = 5;
+}
+
+message BfdSession {
+  IpAddr addr = 1;
+  string ifname = 2;
+  uint32 state = 3;
+  uint32 rem_state = 4;
+  uint32 local_disc = 5;
+  uint32 remote_disc = 6;
+}
+
+message BabelNeighbor {
+  uint32 iface_index = 1;
+  uint32 rxcost = 2;
+  uint32 txcost = 3;
+  uint32 cost = 4;
+  uint32 hello_cnt = 5;
+  uint32 last_hello_int = 6;
+  uint32 last_tstamp = 7;
+  uint64 srtt = 8;
+  uint64 hello_expiry = 9;
+  uint64 ihu_expiry = 10;
+  IpAddr addr = 11;
+}
+
+message BabelInterface {
+  uint32 proto_index = 1;
+  string ifname = 2;
+  bool up = 3;
+  uint32 tx_length = 4;
+  uint32 hello_seqno = 5;
+  repeated BabelNeighbor neighbors = 6;
+  IpAddr addr = 7;
+  IpAddr next_hop_ip4 = 8;
+  IpAddr next_hop_ip6 = 9;
+}
+
+message BabelInfo {
+  string name = 1;
+  uint64 router_id = 2;
+  uint32 update_seqno = 3;
+  bool triggered = 4;
+  repeated BabelInterface interfaces = 5;
+  uint32 neigh_count = 6;
+}
+
+message Snapshot {
+  RouterStatus status = 1;
+  repeated Interface interfaces = 2;
+  repeated ProtocolInfo protocols = 3;
+  repeated BgpInfo bgp = 4;
+  repeated OspfInfo ospf = 5;
+  repeated BfdSession bfd = 6;
+  repeated BabelInfo babel = 7;
+  uint32 trunc_flags = 8;
+  uint64 last_cmd = 9;
+}
+
+message StatusResponse {
+  RouterStatus status = 1;
+  uint32 trunc_flags = 2;
+  uint64 last_cmd = 3;
+}
+
+message InterfacesResponse {
+  repeated Interface interfaces = 1;
+  uint32 trunc_flags = 2;
+}
+
+message ProtocolsResponse {
+  repeated ProtocolInfo protocols = 1;
+  uint32 trunc_flags = 2;
+}
+
+message BgpResponse {
+  repeated BgpInfo sessions = 1;
+  uint32 trunc_flags = 2;
+}
+
+message OspfResponse {
+  repeated OspfInfo instances = 1;
+  uint32 trunc_flags = 2;
+}
+
+message BfdResponse {
+  repeated BfdSession sessions = 1;
+  uint32 trunc_flags = 2;
+}
+
+message BabelResponse {
+  repeated BabelInfo instances = 1;
+  uint32 trunc_flags = 2;
+}
+
+service BirdExporter {
+  rpc GetStatus(Empty) returns (StatusResponse);
+  rpc ListInterfaces(Empty) returns (InterfacesResponse);
+  rpc ListProtocols(Empty) returns (ProtocolsResponse);
+  rpc ListBgp(Empty) returns (BgpResponse);
+  rpc ListOspf(Empty) returns (OspfResponse);
+  rpc ListBfd(Empty) returns (BfdResponse);
+  rpc ListBabel(Empty) returns (BabelResponse);
+  rpc GetSnapshot(Empty) returns (Snapshot);
+}
